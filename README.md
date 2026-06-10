@@ -39,3 +39,8 @@ To spin up this infrastructure from scratch:
    cd infrastructure
    terraform init
    terraform apply
+
+<img width="1227" height="768" alt="Screenshot 2026-06-10 at 01 14 53" src="https://github.com/user-attachments/assets/2b04eab0-660d-4731-b36a-2012b5b8d0e4" />
+
+<img width="1380" height="365" alt="Screenshot 2026-06-10 at 01 22 18" src="https://github.com/user-attachments/assets/9264b1d7-4a21-4b21-8a31-120cdac08b01" />
+<img width="1145" height="167" alt="Screenshot 2026-06-10 at 01 13 47" src="https://github.com/user-attachments/assets/d86b286a-a51a-4201-b9a9-c36da2d3dc2f" />
