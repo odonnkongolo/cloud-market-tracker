@@ -35,7 +35,7 @@ To spin up this infrastructure from scratch:
    Provision the AWS Infrastructure:
 
 2. **Build and Push the Container:**
-   '''Bash
+   '''bash
    cd infrastructure
    terraform init
    terraform apply
