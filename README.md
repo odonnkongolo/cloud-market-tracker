@@ -1,46 +1,41 @@
-# Cloud-Native Market Tracker: AWS EKS & Terraform Deployment
+# Cloud-Native Market Tracker: AWS EKS & DevSecOps Deployment
 
 ## 🏗️ Architecture Overview
-This repository contains the infrastructure and application code for a containerized Market Tracker application. The project demonstrates modern Platform Engineering principles by completely decoupling the application logic from the underlying infrastructure using **Docker**, **Terraform**, and **Amazon EKS (Kubernetes)**.
+This repository contains the infrastructure, application code, and CI/CD automation for a containerized Market Tracker application. The project demonstrates modern Platform Engineering principles by completely decoupling the application logic from the underlying infrastructure using **Docker**, **Terraform**, **Amazon EKS (Kubernetes)**, and **GitHub Actions**.
 
 ## 🚀 Tech Stack
 * **Application Layer:** Python 3.10, Streamlit, Pandas
 * **Containerization:** Docker, Amazon ECR
 * **Infrastructure as Code (IaC):** Terraform
-* **Compute & Orchestration:** Amazon EKS, EC2 Worker Nodes
-* **Networking:** AWS VPC, Public/Private Subnets, NAT Gateway
+* **Compute & Orchestration:** Amazon EKS, EC2 Worker Nodes, Kubernetes Manifests
+* **Networking:** AWS VPC, Public/Private Subnets, NAT Gateway, Network Load Balancer (NLB)
+* **DevSecOps Pipeline:** GitHub Actions, Ruff, Bandit, TFLint, Trivy
 
 ## 📂 Repository Structure
-The repository is split into two strict operational domains to maintain separation of concerns:
+The repository is strictly isolated into distinct operational domains:
 
+* `/.github/workflows`: Contains the automated CI/CD pipeline YAML.
 * `/app`: Contains the Python source code, dependencies, and the `Dockerfile`.
 * `/infrastructure`: Contains the declarative HCL configurations to build the AWS network and Kubernetes cluster.
+* `/kubernetes`: Contains the deployment and load balancer service manifests.
 
-## 🔒 Security & Networking SRE Mechanics
-This environment is built with strict security and high availability in mind:
-1. **Private Compute:** Kubernetes worker nodes are strictly isolated within private subnets. They cannot be accessed directly from the public internet.
-2. **NAT Gateway Routing:** Outbound traffic for node updates is securely routed through a NAT Gateway.
-3. **Automated Vulnerability Scanning:** The Amazon ECR registry is configured via Terraform to automatically scan the Docker image for CVEs upon push.
+## 🔒 SRE & DevSecOps Mechanics
+This environment is built with strict security, high availability, and shift-left testing in mind:
+1. **Automated Security Gates:** Every push to `main` triggers a Directed Acyclic Graph (DAG) pipeline. Python code is linted and scanned for hardcoded secrets (Ruff/Bandit), while infrastructure and containers are scanned for CVEs (TFLint/Trivy) before deployment is permitted.
+2. **Private Compute:** Kubernetes worker nodes are strictly isolated within private subnets. They cannot be accessed directly from the public internet.
+3. **NAT Gateway Routing:** Outbound traffic for node updates is securely routed through a NAT Gateway.
+4. **Modern Access API:** The EKS cluster utilizes the modern `API_AND_CONFIG_MAP` authentication mode, allowing secure, programmatic IAM access for the GitHub runner.
 
 ## ⚙️ Deployment Runbook
-To spin up this infrastructure from scratch:
+This infrastructure is designed for automated continuous delivery. To spin up the environment from scratch:
 
-1. **Build and Push the Container:**
-   ```bash
-   cd app
-   docker build -t market-tracker-app .
-   aws ecr get-login-password --region eu-west-1 | docker login --username AWS --password-stdin <AWS_ACCOUNT_ID>.dkr.ecr.eu-west-1.amazonaws.com
-   docker tag market-tracker-app:latest <AWS_ACCOUNT_ID>[.dkr.ecr.eu-west-1.amazonaws.com/market-tracker-app:latest](https://.dkr.ecr.eu-west-1.amazonaws.com/market-tracker-app:latest)
-   docker push <AWS_ACCOUNT_ID>[.dkr.ecr.eu-west-1.amazonaws.com/market-tracker-app:latest](https://.dkr.ecr.eu-west-1.amazonaws.com/market-tracker-app:latest)
-   Provision the AWS Infrastructure:
+**1. Provision the AWS Infrastructure:**
+Deploy the VPC, NAT Gateway, ECR registry, and EKS cluster via Terraform.
+```bash
+cd infrastructure
+terraform init
+terraform apply
 
-2. **Build and Push the Container:**
-   ```bash
-   cd infrastructure
-   terraform init
-   terraform apply
+**2. Screenshots**
 
-<img width="1227" height="768" alt="Screenshot 2026-06-10 at 01 14 53" src="https://github.com/user-attachments/assets/2b04eab0-660d-4731-b36a-2012b5b8d0e4" />
-
-<img width="1380" height="365" alt="Screenshot 2026-06-10 at 01 22 18" src="https://github.com/user-attachments/assets/9264b1d7-4a21-4b21-8a31-120cdac08b01" />
-<img width="1145" height="167" alt="Screenshot 2026-06-10 at 01 13 47" src="https://github.com/user-attachments/assets/d86b286a-a51a-4201-b9a9-c36da2d3dc2f" />
+screenshots/Screenshot 2026-06-11 at 14.34.00.png screenshots/Screenshot 2026-06-11 at 15.02.09.png screenshots/Screenshot 2026-06-11 at 15.06.34.png
