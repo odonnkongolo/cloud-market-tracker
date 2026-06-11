@@ -1,5 +1,5 @@
 terraform {
-  # This is the strict version lock TFLint is demanding
+  # This is the strict version lock TFLint is demanding.
   required_version = ">= 1.5.0"
 
   required_providers {
@@ -11,5 +11,5 @@ terraform {
 }
 
 provider "aws" {
-  region = "eu-west-1"
+  region = "eu-west-1" 
 }
