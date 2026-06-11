@@ -48,3 +48,41 @@ terraform apply
 ![EKS Cluster & Node Group provisioned via Terraform](screenshots/Screenshot%202026-06-11%20at%2015.02.09.png)
 
 ![Live application running on Kubernetes via Network Load Balancer](screenshots/Screenshot%202026-06-11%20at%2015.06.34.png)
+
+---
+
+## 📊 Observability Stack (Prometheus & Grafana)
+
+To monitor real-time cluster and pod utilisation, a full observability stack is deployed via Helm into an isolated `monitoring` namespace using the community `kube-prometheus-stack` chart.
+
+**Install the stack:**
+```bash
+# Add the community Helm chart repository
+helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+helm repo update
+
+# Deploy Prometheus + Grafana into their own namespace
+helm install kube-prometheus prometheus-community/kube-prometheus-stack \
+  --namespace monitoring \
+  --create-namespace
+```
+
+**Access Grafana locally via a secure port-forward tunnel (no load balancer cost):**
+```bash
+# Retrieve the auto-generated admin password
+kubectl get secret --namespace monitoring kube-prometheus-grafana \
+  -o jsonpath="{.data.admin-password}" | base64 --decode; echo
+
+# Forward the Grafana service to localhost
+kubectl port-forward --namespace monitoring svc/kube-prometheus-grafana 8080:80
+```
+
+Open your browser at **http://localhost:8080** and log in with username `admin` and the password retrieved above.
+
+### 📸 Grafana Dashboards
+
+![Grafana — Kubernetes cluster overview dashboard](screenshots/grafana.png)
+
+![Grafana — Pod CPU & memory utilisation metrics](screenshots/grafana1.png)
+
+![Grafana — Node-level resource consumption](screenshots/grafana2.png)
