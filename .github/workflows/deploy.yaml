@@ -1,0 +1,108 @@
+name: Production EKS Deployment
+
+on:
+  push:
+    branches:
+      - main
+
+env:
+  AWS_REGION: eu-west-1
+  ECR_REPOSITORY: market-tracker-app
+  EKS_CLUSTER_NAME: market-tracker-cluster
+
+jobs:
+  # ==========================================
+  # STAGE 1: Python Application Security
+  # ==========================================
+  app-code-checks:
+    name: Ruff & Bandit Scans
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Install Ruff & Bandit
+        run: pip install ruff bandit
+
+      - name: Run Ruff (Fast Linting & Formatting)
+        run: ruff check app/
+
+      - name: Run Bandit (Python Security Vulnerabilities)
+        # The -r flag scans the folder recursively, -ll filters for medium/high severity
+        run: bandit -r app/ -ll
+
+  # ==========================================
+  # STAGE 2: Infrastructure & Repo Security
+  # ==========================================
+  infra-security-checks:
+    name: TFLint & Trivy Scans
+    runs-on: ubuntu-latest
+    needs: app-code-checks # STRICT DEPENDENCY: Only runs if Stage 1 passes
+    
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup TFLint
+        uses: terraform-linters/setup-tflint@v3
+
+      - name: Initialize & Run TFLint
+        run: |
+          cd infrastructure
+          tflint --init
+          tflint
+
+      - name: Run Trivy Vulnerability Scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          scan-ref: '.'
+          format: 'table'
+          # Fails the pipeline if it finds CRITICAL or HIGH CVEs
+          exit-code: '1'
+          severity: 'CRITICAL,HIGH'
+
+  # ==========================================
+  # STAGE 3: Build & Deploy to EKS
+  # ==========================================
+  build-and-deploy:
+    name: AWS Build & EKS Deployment
+    runs-on: ubuntu-latest
+    needs: infra-security-checks # STRICT DEPENDENCY: Only runs if Stage 2 passes
+    
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build, Tag, and Push Docker Image
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          cd app
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:latest -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY --all-tags
+
+      - name: Update KubeConfig
+        run: aws eks update-kubeconfig --region ${{ env.AWS_REGION }} --name ${{ env.EKS_CLUSTER_NAME }}
+
+      - name: Deploy to Kubernetes
+        run: |
+          kubectl apply -f kubernetes/app-prod.yaml
+          kubectl rollout restart deployment/market-tracker-app
