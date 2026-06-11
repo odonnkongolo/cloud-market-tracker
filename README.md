@@ -81,8 +81,8 @@ Open your browser at **http://localhost:8080** and log in with username `admin` 
 
 ### 📸 Grafana Dashboards
 
-![Grafana — Kubernetes cluster overview dashboard](screenshots/grafana.png)
-
 ![Grafana — Pod CPU & memory utilisation metrics](screenshots/grafana1.png)
+
+![Grafana — Kubernetes cluster overview dashboard](screenshots/grafana.png)
 
 ![Grafana — Node-level resource consumption](screenshots/grafana2.png)
