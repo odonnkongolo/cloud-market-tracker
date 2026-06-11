@@ -1,4 +1,4 @@
-# Cloud-Native Market Tracker: AWS EKS & DevSecOps Deployment
+# Cloud-Native Market Tracker: AWS EKS & DevSecOps Deployment + Grafana Observability
 
 ## 🏗️ Architecture Overview
 This repository contains the infrastructure, application code, and CI/CD automation for a containerized Market Tracker application. The project demonstrates modern Platform Engineering principles by completely decoupling the application logic from the underlying infrastructure using **Docker**, **Terraform**, **Amazon EKS (Kubernetes)**, and **GitHub Actions**.
