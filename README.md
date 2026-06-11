@@ -35,7 +35,16 @@ Deploy the VPC, NAT Gateway, ECR registry, and EKS cluster via Terraform.
 cd infrastructure
 terraform init
 terraform apply
+```
 
-**2. Screenshots**
+**2. Push to `main` to trigger the pipeline** — GitHub Actions will build, scan, and deploy automatically.
 
-screenshots/Screenshot 2026-06-11 at 14.34.00.png screenshots/Screenshot 2026-06-11 at 15.02.09.png screenshots/Screenshot 2026-06-11 at 15.06.34.png
+---
+
+## 📸 Screenshots
+
+![CI/CD Pipeline — Ruff, Bandit, TFLint & Trivy security gates](screenshots/Screenshot%202026-06-11%20at%2014.34.00.png)
+
+![EKS Cluster & Node Group provisioned via Terraform](screenshots/Screenshot%202026-06-11%20at%2015.02.09.png)
+
+![Live application running on Kubernetes via Network Load Balancer](screenshots/Screenshot%202026-06-11%20at%2015.06.34.png)
