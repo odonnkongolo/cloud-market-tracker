@@ -9,6 +9,7 @@ env:
   AWS_REGION: eu-west-1
   ECR_REPOSITORY: market-tracker-app
   EKS_CLUSTER_NAME: market-tracker-cluster
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 jobs:
   # ==========================================
@@ -60,7 +61,7 @@ jobs:
           tflint
 
       - name: Run Trivy Vulnerability Scanner
-        uses: aquasecurity/trivy-action@0.36.0
+        uses: aquasecurity/trivy-action@v0.36.0
         with:
           scan-type: 'fs'
           scan-ref: '.'
