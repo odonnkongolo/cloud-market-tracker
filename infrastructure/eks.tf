@@ -29,6 +29,11 @@ resource "aws_eks_cluster" "main" {
       aws_subnet.public_2.id
     ]
   }
+  # Add this block right here for new API access:
+  access_config {
+    authentication_mode                         = "API_AND_CONFIG_MAP"
+    bootstrap_cluster_creator_admin_permissions = true
+  }
   depends_on = [aws_iam_role_policy_attachment.eks_cluster_policy]
 }
 
